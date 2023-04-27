@@ -1,7 +1,10 @@
-export function Part(props){
-    return(
-        <p>
-        {props.part} {props.exercise}
-        </p>
-    )
+export function Part(props) {
+  console.log(props)
+  return (
+
+      <p>
+        {props.name} {props.exercises}
+      </p>
+
+  );
 }
