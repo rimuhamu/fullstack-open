@@ -12,12 +12,29 @@ export default function App() {
     setNewName(event.target.value);
   }
 
+  function checkName() {
+    /**
+     * ! newName is a string while person.name is inside every element
+     *   
+     * */
+    if(persons.find(person => person.name === newName)){ 
+      window.alert(`${newName} is already in phonebook.`)      
+      
+    }
+    else{
+      const personObject = {
+        name: newName,
+      };
+      setPersons(persons.concat(personObject));
+      console.log(persons)
+      console.log(newName)
+    }
+  };
+
   function addPerson(event) {
     event.preventDefault()
-    const personObject = {
-      name: newName,
-    };
-    setPersons(persons.concat(personObject));
+    checkName()
+    
     setNewName("")
   }
 
