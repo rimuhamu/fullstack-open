@@ -1,13 +1,6 @@
 import { useState } from "react";
-
-function Person({ person }) {
-  return (
-    <>
-      <p>{person.name}</p>
-      <p>{person.number}</p>
-    </>
-  );
-}
+import { Person } from "./Person";
+import { PersonForm } from "./PersonForm";
 
 export default function App() {
   const [persons, setPersons] = useState([
@@ -30,7 +23,7 @@ export default function App() {
     } else {
       const personObject = {
         name: newName,
-        number: newNumber
+        number: newNumber,
       };
       setPersons(persons.concat(personObject));
     }
@@ -47,18 +40,14 @@ export default function App() {
   return (
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
-        </div>
-
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <h3>Add a new</h3>
+      <PersonForm
+        addPerson={addPerson}
+        newName={newName}
+        handleNameChange={handleNameChange}
+        newNumber={newNumber}
+        handleNumberChange={handleNumberChange}
+      />
       <h2>Numbers</h2>
       <ul>
         {persons.map((person) => (
