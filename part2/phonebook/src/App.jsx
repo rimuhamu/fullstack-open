@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Person } from "./Person";
 import { PersonForm } from "./PersonForm";
-import axios from 'axios';
+import personService from "./services/persons";
 
 export default function App() {
   const [persons, setPersons] = useState([
@@ -11,7 +11,9 @@ export default function App() {
   const [newNumber, setNewNumber] = useState("");
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then((response) => {setPersons(response.data)})
+    personService.getAll().then(initalPersons => {
+      setPersons(initalPersons)
+    });
   }, []);
 
   function handleNameChange(event) {
@@ -30,7 +32,9 @@ export default function App() {
         name: newName,
         number: newNumber,
       };
-      setPersons(persons.concat(personObject));
+      personService.create(personObject).then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
+      });
     }
   }
 
