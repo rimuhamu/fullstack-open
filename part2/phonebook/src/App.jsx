@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import { Person } from "./Person";
 import { PersonForm } from "./PersonForm";
 import personService from "./services/persons";
+import { Notification } from "./Notification";
+import "./index.css";
 
 export default function App() {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "491632930" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
+  const [addedMessage, setAddedMessage] = useState(null);
 
   useEffect(() => {
-    personService.getAll().then(initalPersons => {
-      setPersons(initalPersons)
+    personService.getAll().then((initalPersons) => {
+      setPersons(initalPersons);
     });
-  }, []);
+  }, [persons]);
 
   function handleNameChange(event) {
     setNewName(event.target.value);
@@ -32,9 +33,19 @@ export default function App() {
         name: newName,
         number: newNumber,
       };
-      personService.create(personObject).then(returnedPerson => {
-        setPersons(persons.concat(returnedPerson))
-      });
+      personService
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+        })
+        .then(() => {
+          setAddedMessage(
+            ` Added ${newName}`
+          );
+          setTimeout(() => {
+            setAddedMessage(null);
+          }, 5000);
+        })
     }
   }
 
@@ -46,9 +57,17 @@ export default function App() {
     setNewNumber("");
   }
 
+  function deletePerson(person) {
+    if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
+      personService.removePerson(person.id).then((deletedPersons) => {
+        setPersons(deletedPersons);
+      });
+    }
+  }
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={addedMessage} />
       <h3>Add a new</h3>
       <PersonForm
         addPerson={addPerson}
@@ -60,7 +79,11 @@ export default function App() {
       <h2>Numbers</h2>
       <ul>
         {persons.map((person) => (
-          <Person key={person.name} person={person} />
+          <Person
+            key={person.id}
+            person={person}
+            deletePerson={() => deletePerson(person)}
+          />
         ))}
       </ul>
     </div>
