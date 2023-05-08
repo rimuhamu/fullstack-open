@@ -15,7 +15,7 @@ export default function App() {
     personService.getAll().then((initalPersons) => {
       setPersons(initalPersons);
     });
-  }, [persons]);
+  }, []);
 
   function handleNameChange(event) {
     setNewName(event.target.value);
@@ -59,8 +59,8 @@ export default function App() {
 
   function deletePerson(person) {
     if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
-      personService.removePerson(person.id).then((deletedPersons) => {
-        setPersons(deletedPersons);
+      personService.removePerson(person.id).then(() => {
+        setPersons(persons.filter(p => p.id !== person.id))
       });
     }
   }
