@@ -1,20 +1,22 @@
 import { useRef, useState, useEffect } from 'react'
+import { useDispatch, useSelector } from "react-redux";
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
-import ErrorNotification from './components/ErrorNotification'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+import { createNotification } from './reducers/notificationReducer';
+
 const App = () => {
+  const dispatch = useDispatch()
+
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [update, setUpdate] = useState(null)
-  const [message, setMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
 
   const blogFormRef = useRef()
 
@@ -56,10 +58,13 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(createNotification(
+        {
+          message: 'wrong credentials',
+          type: "error",
+        },
+        5
+      ))
     }
   }
 
@@ -86,14 +91,13 @@ const App = () => {
   const addBlog = async (blogObject) => {
     blogFormRef.current.toggleVisibility()
     const returnedBlog = await blogService.create(blogObject)
-    console.log(returnedBlog)
     setBlogs(blogs.concat(returnedBlog))
-    setMessage(`Added ${blogObject.title} by ${blogObject.author}`)
+    dispatch(createNotification({ message: `Added ${blogObject.title} by ${blogObject.author}`, type: 'success' }, 5))
   }
 
   const addLikes = async id => {
     const blog = blogs.find(blog => blog.id === id)
-    const changedBlog = { ...blog,user: blog.user.id, likes: blog.likes+1 }
+    const changedBlog = { ...blog, user: blog.user.id, likes: blog.likes + 1 }
 
     const updatedBlog = await blogService.update(id, changedBlog)
     setBlogs(blogs.map(blog => blog.id !== id ? blog : updatedBlog))
@@ -110,21 +114,21 @@ const App = () => {
 
 
 
+
   return (
     <div>
       <h1>Blogs</h1>
-      <ErrorNotification message={errorMessage} />
       {user === null && <div>
         <h2>Log in to application</h2>
         {loginForm()}
       </div>}
+      <Notification />
       {user && <div className='bloglist'>
         <h2>blogs</h2>
         <p>logged in as {user.name}</p>
         <button id='logout-button' onClick={handleLogout}>logout</button>
-        <Notification message={message} />
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
-          <BlogForm createBlog={addBlog}/>
+          <BlogForm createBlog={addBlog} />
         </Togglable>
 
         {blogs.map((blog) =>
