@@ -9,7 +9,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 
 import { createNotification } from './reducers/notificationReducer';
-import { initializeBlogs, createBlog } from './reducers/blogReducer';
+import { initializeBlogs, createBlog, likeBlog, deleteBlog } from './reducers/blogReducer';
 
 const App = () => {
   const dispatch = useDispatch()
@@ -29,7 +29,7 @@ const App = () => {
     dispatch(initializeBlogs())
     console.log('fetching blogs')
     // might throw an error -> [update]
-  }, [dispatch])
+  }, [update])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -88,24 +88,12 @@ const App = () => {
     dispatch(createBlog(blogObject))
   }
 
-  const addLikes = async id => {
-    const blog = blogs.find(blog => blog.id === id)
-    const changedBlog = { ...blog, user: blog.user.id, likes: blog.likes + 1 }
-
-    const updatedBlog = await blogService.update(id, changedBlog)
-    setBlogs(blogs.map(blog => blog.id !== id ? blog : updatedBlog))
-  }
-
-  const remove = async id => {
-    const blog = blogs.find(blog => blog.id === id)
-    if (window.confirm(`remove blog ${blog.title}) by ${blog.author}`)) {
-      blogService.setToken(user.token)
-      await blogService.remove(blog.id, user.token)
+  const remove = (blog, user) => {
+    if (window.confirm(`remove blog ${blog.title} by ${blog.author}`)) {
+      dispatch(deleteBlog(blog, user))
       setUpdate(!update)
     }
   }
-
-
 
 
   return (
@@ -125,8 +113,8 @@ const App = () => {
         </Togglable>
 
         {sortedBlogs.map((blog) =>
-          <Blog key={blog.id} blog={blog} user={user} addLikes={() => addLikes(blog.id)}
-            deleteBlog={() => remove(blog.id, user.token)}
+          <Blog key={blog.id} blog={blog} user={user} addLikes={() => dispatch(likeBlog(blog.id, blog))}
+            deleteBlog={() => remove(blog, user)}
           />
         )}
       </div>}
