@@ -10,6 +10,7 @@ import loginService from './services/login'
 
 import { createNotification } from './reducers/notificationReducer';
 import { initializeBlogs, createBlog, likeBlog, deleteBlog } from './reducers/blogReducer';
+import { logUserIn, logUserOut } from './reducers/loginReducer';
 
 const App = () => {
   const dispatch = useDispatch()
@@ -43,10 +44,12 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault()
 
+    const credentials = {
+      username: username,
+      password: password
+    }
     try {
-      const user = await loginService.login({
-        username, password,
-      })
+      dispatch(logUserIn(credentials))
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
       setUser(user)
