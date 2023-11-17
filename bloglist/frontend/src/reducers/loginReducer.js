@@ -23,9 +23,10 @@ export const logUserIn = (credentials) => {
         const { username, password } = credentials
 
         try {
-            const user = await loginService({ username, password })
-
+            const user = await loginService.login({ username, password })
+            console.log("logged in")
             userService.setUser(user)
+            console.log(user)
             dispatch(login(user))
             dispatch(
                 createNotification({ message: `Welcome ${user.name}!`, type: "info" })

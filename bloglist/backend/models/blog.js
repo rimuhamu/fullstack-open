@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 
 const schema = mongoose.Schema({
-  title: { 
+  title: {
     type: String,
     required: true
   },
-  author: { 
+  author: {
     type: String,
     required: true
   },
@@ -14,7 +14,11 @@ const schema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  comments: {
+    type: Array,
+    default: [],
+  },
 })
 
 schema.set('toJSON', {

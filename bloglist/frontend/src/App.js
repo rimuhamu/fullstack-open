@@ -7,19 +7,21 @@ import Togglable from './components/Togglable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import userService from './services/users'
 
 import { createNotification } from './reducers/notificationReducer';
 import { initializeBlogs, createBlog, likeBlog, deleteBlog } from './reducers/blogReducer';
-import { logUserIn, logUserOut } from './reducers/loginReducer';
+import { logUserIn, logUserOut, login } from './reducers/loginReducer';
+import { initializeUsers } from './reducers/userReducer';
 
 const App = () => {
   const dispatch = useDispatch()
 
 
   const blogs = useSelector((state) => state.blogs)
+  const user = useSelector((state) => state.login);
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
   const [update, setUpdate] = useState(null)
 
   const blogFormRef = useRef()
@@ -27,8 +29,17 @@ const App = () => {
   const sortedBlogs = orderBy(blogs, ["likes"], ["desc"])
 
   useEffect(() => {
+    const userFromStorage = userService.getUser();
+    if (userFromStorage) {
+      dispatch(login(userFromStorage));
+    }
+  }, [])
+
+  useEffect(() => {
+
     dispatch(initializeBlogs())
-    console.log('fetching blogs')
+    dispatch(initializeUsers())
+    console.log('fetching blogs and users')
     // might throw an error -> [update]
   }, [update])
 
@@ -36,23 +47,23 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+
       blogService.setToken(user.token)
     }
   }, [])
 
   const handleLogin = async (event) => {
     event.preventDefault()
-
+    console.log(username)
     const credentials = {
       username: username,
       password: password
     }
     try {
       dispatch(logUserIn(credentials))
+      console.log(user)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      setUser(user)
       setUsername('')
       setPassword('')
     } catch (exception) {
@@ -68,7 +79,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.clear()
-    setUser(null)
+
     console.log('logged out')
   }
 
